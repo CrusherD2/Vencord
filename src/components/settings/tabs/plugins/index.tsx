@@ -84,7 +84,8 @@ const enum SearchStatus {
     DISABLED,
     NEW,
     USER_PLUGINS,
-    API_PLUGINS
+    API_PLUGINS,
+    FROM_SOURCES
 }
 
 function ExcludedPluginsList({ search }: { search: string; }) {
@@ -164,7 +165,8 @@ function PluginSettings() {
     const sourceResults = useSourceManifests(pluginSources);
     const [selectedSourcePlugins, setSelectedSourcePlugins] = useState<Record<string, SourcePluginEntry>>({});
     const installedVersions = useInstalledVersions();
-    const availableUpdates = findSourceUpdates(sourceResults.manifests, installedVersions).filter(u => u.hasUpdate);
+    const sourceInstalled = findSourceUpdates(sourceResults.manifests, installedVersions);
+    const availableUpdates = sourceInstalled.filter(u => u.hasUpdate);
 
     const search = searchValue.value.toLowerCase();
     const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, value: query }));
@@ -187,6 +189,9 @@ function PluginSettings() {
                 break;
             case SearchStatus.USER_PLUGINS:
                 if (!PluginMeta[plugin.name]?.userPlugin) return false;
+                break;
+            case SearchStatus.FROM_SOURCES:
+                if (!sourceInstalled.some(u => u.name === plugin.name)) return false;
                 break;
             case SearchStatus.API_PLUGINS:
                 if (!plugin.name.endsWith("API")) return false;
@@ -270,7 +275,7 @@ function PluginSettings() {
     // Plugins from sources that aren't installed yet, shown alongside the installed ones
     const sourcePluginCards = [] as JSX.Element[];
     const showSourcePlugins = !searchValue.tags.length
-        && (searchValue.status === SearchStatus.ALL || searchValue.status === SearchStatus.USER_PLUGINS);
+        && [SearchStatus.ALL, SearchStatus.USER_PLUGINS, SearchStatus.FROM_SOURCES].includes(searchValue.status);
     if (showSourcePlugins) {
         const seen = new Set<string>();
         for (const source of sourceResults.manifests) {
@@ -332,6 +337,7 @@ function PluginSettings() {
                             { label: "Show Disabled", value: SearchStatus.DISABLED },
                             { label: "Show New", value: SearchStatus.NEW },
                             hasUserPlugins && { label: "Show UserPlugins", value: SearchStatus.USER_PLUGINS },
+                            canUsePluginSources && !!pluginSources.length && { label: "Show from sources", value: SearchStatus.FROM_SOURCES },
                             { label: "Show API Plugins", value: SearchStatus.API_PLUGINS },
                         ].filter(isTruthy)}
                         serialize={String}

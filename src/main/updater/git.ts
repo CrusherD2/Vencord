@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { buildVencord, isFlatpak, VENCORD_SRC_DIR } from "@main/utils/buildVencord";
 import { IpcEvents } from "@shared/IpcEvents";
 import { execFile as cpExecFile } from "child_process";
 import { ipcMain } from "electron";
 import { promisify } from "util";
 
-import { buildVencord, isFlatpak, VENCORD_SRC_DIR } from "../utils/buildVencord";
 import { serializeErrors } from "./common";
 
 const execFile = promisify(cpExecFile);

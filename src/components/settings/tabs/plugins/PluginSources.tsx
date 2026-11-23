@@ -21,6 +21,7 @@ import { Margins } from "@utils/margins";
 import { relaunch } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { showToast, TextInput, useState } from "@webpack/common";
+
 import { PluginMeta } from "~plugins";
 
 export const cl = classNameFactory("vc-plugin-sources-");
