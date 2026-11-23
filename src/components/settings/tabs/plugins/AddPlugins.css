@@ -1,0 +1,21 @@
+.vc-add-plugins-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25em;
+    margin-top: 0.5em;
+    border: 2px dashed var(--border-normal);
+    text-align: center;
+    cursor: pointer;
+
+    &:hover,
+    &.vc-add-plugins-dragging {
+        background-color: var(--background-mod-subtle);
+        border-color: var(--brand-500);
+    }
+}
+
+.vc-add-plugins-busy {
+    cursor: progress;
+    opacity: 0.6;
+}

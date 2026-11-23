@@ -52,6 +52,10 @@ export default {
         getRepo: () => invoke<IpcRes<string>>(IpcEvents.GET_REPO),
     },
 
+    userPlugins: {
+        install: (files: { fileName: string; data: Uint8Array; }[]) => invoke<IpcRes<string[]>>(IpcEvents.INSTALL_USER_PLUGIN, files),
+    },
+
     settings: {
         get: () => sendSync<Settings>(IpcEvents.GET_SETTINGS),
         set: (settings: Settings, pathToNotify?: string) => invoke<void>(IpcEvents.SET_SETTINGS, settings, pathToNotify),

@@ -79,6 +79,10 @@ window.VencordNative = {
         rebuild: async () => ({ ok: true, value: true }),
     },
 
+    userPlugins: {
+        install: async () => ({ ok: false, error: new Error("Installing plugins is not supported on web") }),
+    },
+
     quickCss: {
         get: () => DataStore.get("VencordQuickCss").then(s => s ?? ""),
         set: async (css: string) => {

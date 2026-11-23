@@ -54,6 +54,26 @@ export function chooseFile(mimeTypes: string) {
     });
 }
 
+/**
+ * Prompts the user to choose one or more files from their system
+ * @param mimeTypes A comma separated list of mime types to accept, see https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept#unique_file_type_specifiers
+ * @returns A promise that resolves to the chosen files, which is empty if the user cancels
+ */
+export function chooseFiles(mimeTypes: string) {
+    return new Promise<File[]>(resolve => {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.multiple = true;
+        input.style.display = "none";
+        input.accept = mimeTypes;
+        input.onchange = () => resolve(Array.from(input.files ?? []));
+
+        document.body.appendChild(input);
+        input.click();
+        setImmediate(() => document.body.removeChild(input));
+    });
+}
+
 export function getStylusWebStoreUrl() {
     const isChromium = (navigator as any).userAgentData?.brands?.some(b => b.brand === "Chromium");
 

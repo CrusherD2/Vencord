@@ -29,7 +29,7 @@ import { fetchBuffer } from "./http";
 
 const extensionCacheDir = join(DATA_DIR, "ExtensionCache");
 
-async function extract(data: Buffer, outDir: string) {
+export async function extract(data: Buffer, outDir: string) {
     await mkdir(outDir, { recursive: true });
     return new Promise<void>((resolve, reject) => {
         unzip(data, (err, files) => {
