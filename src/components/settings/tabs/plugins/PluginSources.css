@@ -1,0 +1,38 @@
+.vc-plugin-sources-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    margin-top: 0.5em;
+}
+
+.vc-plugin-sources-add {
+    display: flex;
+    gap: 0.5em;
+    align-items: center;
+
+    > :first-child {
+        flex: 1;
+    }
+}
+
+.vc-plugin-sources-row {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    padding-top: 0.5em;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.vc-plugin-sources-row-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.vc-plugin-sources-error {
+    color: var(--text-feedback-critical);
+}
+
+.vc-plugin-sources-actions {
+    display: flex;
+    gap: 0.5em;
+}

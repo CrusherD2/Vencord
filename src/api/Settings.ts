@@ -45,6 +45,7 @@ export interface Settings {
     enabledThemes: string[];
     enableReactDevtools: boolean;
     themeLinks: string[];
+    pluginSources: string[];
     frameless: boolean;
     transparent: boolean;
     winCtrlQ: boolean;
@@ -98,6 +99,7 @@ const DefaultSettings: Settings = {
     autoUpdateNotification: true,
     useQuickCss: true,
     themeLinks: [],
+    pluginSources: [],
     eagerPatches: false, // Eagerly patching no longer works due to module factories with the same id being able to have different sources now.
     enabledThemes: [],
     enableReactDevtools: false,

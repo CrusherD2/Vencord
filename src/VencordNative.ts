@@ -9,6 +9,7 @@ import type { CspRequestResult } from "@main/csp/manager";
 import type { PluginIpcMappings } from "@main/ipcPlugins";
 import type { UserThemeHeader } from "@main/themes";
 import { IpcEvents } from "@shared/IpcEvents";
+import type { PluginSourceManifest, SourcePluginSelection } from "@shared/pluginSources";
 import type { IpcRes } from "@utils/types";
 import { ipcRenderer } from "electron/renderer";
 
@@ -55,6 +56,8 @@ export default {
     userPlugins: {
         install: (files: { fileName: string; data: Uint8Array; }[]) => invoke<IpcRes<string[]>>(IpcEvents.INSTALL_USER_PLUGIN, files),
         update: (folderName: string, file: { fileName: string; data: Uint8Array; }) => invoke<IpcRes<string>>(IpcEvents.UPDATE_USER_PLUGIN, folderName, file),
+        getSource: (url: string) => invoke<IpcRes<PluginSourceManifest>>(IpcEvents.GET_PLUGIN_SOURCE, url),
+        installFromSources: (selections: SourcePluginSelection[]) => invoke<IpcRes<string[]>>(IpcEvents.INSTALL_FROM_PLUGIN_SOURCES, selections),
     },
 
     settings: {

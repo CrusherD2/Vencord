@@ -45,6 +45,7 @@ import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
 
 import { AddPluginsButton } from "./AddPlugins";
 import { PluginCard } from "./PluginCard";
+import { canUsePluginSources, InstallSourcePluginsCard, PluginSourcesSection, SourcePluginCard, SourcePluginEntry, sourcePluginKey, useSourceManifests } from "./PluginSources";
 import { UIElementsButton } from "./UIElements";
 
 export const cl = classNameFactory("vc-plugins-");
@@ -159,6 +160,10 @@ function PluginSettings() {
 
     const [searchValue, setSearchValue] = useState({ value: "", tags: [] as PluginTag[], status: SearchStatus.ALL });
 
+    const pluginSources = canUsePluginSources ? settings.pluginSources : [];
+    const sourceResults = useSourceManifests(pluginSources);
+    const [selectedSourcePlugins, setSelectedSourcePlugins] = useState<Record<string, SourcePluginEntry>>({});
+
     const search = searchValue.value.toLowerCase();
     const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, value: query }));
 
@@ -259,12 +264,46 @@ function PluginSettings() {
         }
     }
 
+    // Plugins from sources that aren't installed yet, shown alongside the installed ones
+    const sourcePluginCards = [] as JSX.Element[];
+    const showSourcePlugins = !searchValue.tags.length
+        && (searchValue.status === SearchStatus.ALL || searchValue.status === SearchStatus.USER_PLUGINS);
+    if (showSourcePlugins) {
+        const seen = new Set<string>();
+        for (const source of sourceResults.manifests) {
+            for (const plugin of source.plugins) {
+                if (plugin.name in Plugins || plugin.name in ExcludedPlugins || seen.has(plugin.name)) continue;
+                seen.add(plugin.name);
+
+                if (search && !plugin.name.toLowerCase().includes(search) && !plugin.description.toLowerCase().includes(search)) continue;
+
+                const entry: SourcePluginEntry = { ...plugin, source };
+                const key = sourcePluginKey(entry);
+                sourcePluginCards.push(
+                    <SourcePluginCard
+                        key={key}
+                        plugin={entry}
+                        selected={key in selectedSourcePlugins}
+                        onToggle={() => setSelectedSourcePlugins(({ [key]: existing, ...rest }) => existing ? rest : { ...rest, [key]: entry })}
+                    />
+                );
+            }
+        }
+        sourcePluginCards.sort((a, b) => String(a.key).localeCompare(String(b.key)));
+    }
+    const selectedSourceList = Object.values(selectedSourcePlugins);
+
     return (
         <SettingsTab>
             <ReloadRequiredCard required={changes.hasChanges} />
 
             <UIElementsButton />
             <AddPluginsButton />
+            {canUsePluginSources && (
+                <ErrorBoundary noop>
+                    <PluginSourcesSection sources={pluginSources} results={sourceResults} />
+                </ErrorBoundary>
+            )}
 
             <Heading tag="h4" className={classes(Margins.top20, Margins.bottom8)}>
                 Filters
@@ -311,11 +350,17 @@ function PluginSettings() {
 
             <Heading tag="h4" className={Margins.top20}>Plugins</Heading>
 
-            {plugins.length || requiredPlugins.length
+            {!!selectedSourceList.length && (
+                <ErrorBoundary noop>
+                    <InstallSourcePluginsCard selected={selectedSourceList} onCancel={() => setSelectedSourcePlugins({})} />
+                </ErrorBoundary>
+            )}
+
+            {plugins.length || requiredPlugins.length || sourcePluginCards.length
                 ? (
                     <div className={cl("grid")}>
-                        {plugins.length
-                            ? plugins
+                        {plugins.length || sourcePluginCards.length
+                            ? [...plugins, ...sourcePluginCards]
                             : <Paragraph>No plugins meet the search criteria.</Paragraph>
                         }
                     </div>
