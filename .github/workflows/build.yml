@@ -63,6 +63,17 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   RELEASE_TAG: ${{ env.release_tag }}
 
+            # Forks publish their own release so the installer and updater can pull from them
+            - name: Upload DevBuild as release (fork)
+              if: github.repository != 'Vendicated/Vencord'
+              run: |
+                  gh release view devbuild > /dev/null 2>&1 || gh release create devbuild --title "DevBuild $RELEASE_TAG" --notes "Latest build of $GITHUB_REPOSITORY"
+                  gh release upload devbuild --clobber dist/*
+                  gh release edit devbuild --title "DevBuild $RELEASE_TAG" --latest
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  RELEASE_TAG: ${{ env.release_tag }}
+
             - name: Upload DevBuild to builds repo
               if: github.repository == 'Vendicated/Vencord'
               run: |
