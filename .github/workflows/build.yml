@@ -68,6 +68,9 @@ jobs:
             - name: Upload DevBuild as release (fork)
               if: github.repository != 'Vendicated/Vencord'
               run: |
+                  # point the tag at this build so the release's Source code downloads match it
+                  git tag -f devbuild HEAD
+                  git push -f origin refs/tags/devbuild
                   gh release view devbuild > /dev/null 2>&1 || gh release create devbuild --title "DevBuild $RELEASE_TAG" --notes "Latest build of $GITHUB_REPOSITORY"
                   gh release upload devbuild --clobber dist/*
                   gh release edit devbuild --title "DevBuild $RELEASE_TAG" --latest
