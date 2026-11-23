@@ -22,7 +22,11 @@ The cutest Discord client mod
 
 ## Installing / Uninstalling
 
-Visit https://vencord.dev/download
+This is **CrusherD2's fork** of Vencord. It adds installing plugins from zips, updating plugins, and plugin sources ([CrusherD2/vencord-plugins](https://github.com/CrusherD2/vencord-plugins)).
+
+**[Download VencordInstaller.exe](https://github.com/CrusherD2/Installer/releases/latest/download/VencordInstaller.exe)** (Windows), run it, pick your Discord install and click **Install**. Updates come from this fork automatically. Use the same installer to uninstall.
+
+For official Vencord, visit https://vencord.dev/download
 
 ## Join our Support/Community Server
 

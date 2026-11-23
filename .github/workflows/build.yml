@@ -68,12 +68,25 @@ jobs:
             - name: Upload DevBuild as release (fork)
               if: github.repository != 'Vendicated/Vencord'
               run: |
+                  cat > release-notes.md <<EOF
+                  ## Install
+
+                  **Don't download the files below to install.** Get the installer instead:
+
+                  **[Download VencordInstaller.exe](https://github.com/${GITHUB_REPOSITORY_OWNER}/Installer/releases/latest/download/VencordInstaller.exe)** (Windows)
+
+                  Run it, pick your Discord install and click **Install**. Updates arrive automatically through Vencord's updater.
+
+                  ---
+
+                  The files below are the latest build of [${GITHUB_REPOSITORY}](https://github.com/${GITHUB_REPOSITORY}) (${RELEASE_TAG}), which the installer and updater download.
+                  EOF
                   # point the tag at this build so the release's Source code downloads match it
                   git tag -f devbuild HEAD
                   git push -f origin refs/tags/devbuild
-                  gh release view devbuild > /dev/null 2>&1 || gh release create devbuild --title "DevBuild $RELEASE_TAG" --notes "Latest build of $GITHUB_REPOSITORY"
+                  gh release view devbuild > /dev/null 2>&1 || gh release create devbuild --title "DevBuild $RELEASE_TAG" --notes-file release-notes.md
                   gh release upload devbuild --clobber dist/*
-                  gh release edit devbuild --title "DevBuild $RELEASE_TAG" --latest
+                  gh release edit devbuild --title "DevBuild $RELEASE_TAG" --notes-file release-notes.md --latest
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   RELEASE_TAG: ${{ env.release_tag }}
