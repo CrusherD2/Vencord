@@ -41,6 +41,7 @@ import { PluginMeta } from "~plugins";
 import { OptionComponentMap } from "./components";
 import { openContributorModal } from "./ContributorModal";
 import { FavoriteButton, GithubButton, WebsiteButton } from "./PluginModalButtons";
+import { UpdatePluginSection } from "./UpdatePlugin";
 
 const cl = classNameFactory("vc-plugin-modal-");
 
@@ -246,6 +247,12 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     <Heading tag="h3" className={classes(Margins.top16, Margins.bottom8)}>Settings</Heading>
                     {renderSettings()}
                 </section>
+
+                {pluginMeta.userPlugin && (
+                    <ErrorBoundary noop>
+                        <UpdatePluginSection pluginName={plugin.name} folderName={pluginMeta.folderName} />
+                    </ErrorBoundary>
+                )}
             </div>
         </Modal>
     );

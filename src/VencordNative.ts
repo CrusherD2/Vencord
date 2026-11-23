@@ -54,6 +54,7 @@ export default {
 
     userPlugins: {
         install: (files: { fileName: string; data: Uint8Array; }[]) => invoke<IpcRes<string[]>>(IpcEvents.INSTALL_USER_PLUGIN, files),
+        update: (folderName: string, file: { fileName: string; data: Uint8Array; }) => invoke<IpcRes<string>>(IpcEvents.UPDATE_USER_PLUGIN, folderName, file),
     },
 
     settings: {
