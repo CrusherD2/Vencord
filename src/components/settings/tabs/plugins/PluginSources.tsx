@@ -14,15 +14,16 @@ import { DeleteIcon, OpenExternalIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { AddonCard } from "@components/settings/AddonCard";
-import { parsePluginSource, PluginSourceManifest, SourcePlugin, SourcePluginSelection } from "@shared/pluginSources";
+import { isNewerVersion, parsePluginSource, PluginSourceManifest, SourcePlugin, SourcePluginSelection } from "@shared/pluginSources";
 import { classNameFactory } from "@utils/css";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { relaunch } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { showToast, TextInput, useState } from "@webpack/common";
+import { PluginMeta } from "~plugins";
 
-const cl = classNameFactory("vc-plugin-sources-");
+export const cl = classNameFactory("vc-plugin-sources-");
 const logger = new Logger("PluginSources");
 
 export interface SourcePluginEntry extends SourcePlugin {
@@ -33,6 +34,14 @@ export interface SourceResults {
     manifests: PluginSourceManifest[];
     errors: Record<string, string>;
     pending: boolean;
+}
+
+export interface SourcePluginUpdateInfo {
+    name: string;
+    installedFolder: string;
+    installedVersion: string | null;
+    latest: SourcePluginEntry;
+    hasUpdate: boolean;
 }
 
 export const sourcePluginKey = (p: SourcePluginEntry) => `${p.source.url}#${p.folder}`;
@@ -54,6 +63,81 @@ export function useSourceManifests(sources: string[]): SourceResults {
     }, { fallbackValue: { manifests: [], errors: {} }, deps: [sources.join("\n")] });
 
     return { ...results, pending };
+}
+
+export function useInstalledVersions() {
+    const [versions] = useAwaiter(async () => {
+        const res = await VencordNative.userPlugins.getVersions();
+        return res.ok ? res.value : {};
+    }, { fallbackValue: {} });
+    return versions;
+}
+
+// Matches installed user plugins to the first source that lists a plugin with the same name
+export function findSourceUpdates(manifests: PluginSourceManifest[], versions: Record<string, string | null>) {
+    const updates: SourcePluginUpdateInfo[] = [];
+    for (const [name, meta] of Object.entries(PluginMeta)) {
+        if (!meta.userPlugin) continue;
+
+        const source = manifests.find(m => m.plugins.some(p => p.name === name));
+        const plugin = source?.plugins.find(p => p.name === name);
+        if (!source || !plugin) continue;
+
+        // folderName looks like "src/userplugins/myPlugin.desktop"
+        const installedFolder = meta.folderName.split("/").pop() ?? meta.folderName;
+        const installedVersion = versions[installedFolder] ?? null;
+        updates.push({
+            name,
+            installedFolder,
+            installedVersion,
+            latest: { ...plugin, source },
+            hasUpdate: installedVersion !== null && !!plugin.version && isNewerVersion(plugin.version, installedVersion)
+        });
+    }
+    return updates.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export async function updatePluginsFromSources(updates: SourcePluginUpdateInfo[]) {
+    const res = await VencordNative.userPlugins.updateFromSources(updates.map(u => ({
+        url: u.latest.source.url,
+        folder: u.latest.folder,
+        installedFolder: u.installedFolder
+    })));
+    if (!res.ok) {
+        logger.error("Failed to update plugins from sources", res.error);
+        showToast({ text: res.error?.message ?? "Failed to update plugins", variant: "critical" });
+        return;
+    }
+
+    showToast({ text: `Updated ${updates.map(u => u.name).join(", ")}, restarting Discord...`, variant: "success" });
+    setTimeout(relaunch, 1500);
+}
+
+export function SourceUpdatesCard({ updates }: { updates: SourcePluginUpdateInfo[]; }) {
+    const [busy, setBusy] = useState(false);
+
+    async function updateAll() {
+        setBusy(true);
+        try {
+            await updatePluginsFromSources(updates);
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    return (
+        <Card variant="info" className={Margins.top16} defaultPadding>
+            <Heading tag="h4">
+                {busy ? "Updating plugins..." : `${updates.length} plugin update${updates.length === 1 ? "" : "s"} available`}
+            </Heading>
+            <Paragraph className={Margins.bottom8}>
+                {busy
+                    ? "Downloading and rebuilding Vencord, this may take a moment"
+                    : updates.map(u => `${u.name} ${u.installedVersion} → ${u.latest.version}`).join(", ")}
+            </Paragraph>
+            <Button size="small" disabled={busy} onClick={updateAll}>Update all & restart</Button>
+        </Card>
+    );
 }
 
 export function PluginSourcesSection({ sources, results }: { sources: string[]; results: SourceResults; }) {

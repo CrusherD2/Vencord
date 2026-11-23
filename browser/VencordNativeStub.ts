@@ -84,6 +84,8 @@ window.VencordNative = {
         update: async () => ({ ok: false, error: new Error("Updating plugins is not supported on web") }),
         getSource: async () => ({ ok: false, error: new Error("Plugin sources are not supported on web") }),
         installFromSources: async () => ({ ok: false, error: new Error("Plugin sources are not supported on web") }),
+        updateFromSources: async () => ({ ok: false, error: new Error("Plugin sources are not supported on web") }),
+        getVersions: async () => ({ ok: true, value: {} }),
     },
 
     quickCss: {

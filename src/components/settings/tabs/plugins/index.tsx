@@ -45,7 +45,7 @@ import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
 
 import { AddPluginsButton } from "./AddPlugins";
 import { PluginCard } from "./PluginCard";
-import { canUsePluginSources, InstallSourcePluginsCard, PluginSourcesSection, SourcePluginCard, SourcePluginEntry, sourcePluginKey, useSourceManifests } from "./PluginSources";
+import { canUsePluginSources, findSourceUpdates, InstallSourcePluginsCard, PluginSourcesSection, SourcePluginCard, SourcePluginEntry, sourcePluginKey, SourceUpdatesCard, useInstalledVersions, useSourceManifests } from "./PluginSources";
 import { UIElementsButton } from "./UIElements";
 
 export const cl = classNameFactory("vc-plugins-");
@@ -163,6 +163,8 @@ function PluginSettings() {
     const pluginSources = canUsePluginSources ? settings.pluginSources : [];
     const sourceResults = useSourceManifests(pluginSources);
     const [selectedSourcePlugins, setSelectedSourcePlugins] = useState<Record<string, SourcePluginEntry>>({});
+    const installedVersions = useInstalledVersions();
+    const availableUpdates = findSourceUpdates(sourceResults.manifests, installedVersions).filter(u => u.hasUpdate);
 
     const search = searchValue.value.toLowerCase();
     const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, value: query }));
@@ -258,6 +260,7 @@ function PluginSettings() {
                     disabled={false}
                     plugin={p}
                     isNew={newPlugins?.includes(p.name)}
+                    updateVersion={availableUpdates.find(u => u.name === p.name)?.latest.version}
                     key={p.name}
                 />
             );
@@ -349,6 +352,12 @@ function PluginSettings() {
             </ErrorBoundary>
 
             <Heading tag="h4" className={Margins.top20}>Plugins</Heading>
+
+            {!!availableUpdates.length && (
+                <ErrorBoundary noop>
+                    <SourceUpdatesCard updates={availableUpdates} />
+                </ErrorBoundary>
+            )}
 
             {!!selectedSourceList.length && (
                 <ErrorBoundary noop>

@@ -41,9 +41,10 @@ interface Props {
     infoButton?: ReactNode;
     footer?: ReactNode;
     author?: ReactNode;
+    badge?: ReactNode;
 }
 
-export function AddonCard({ disabled, isNew, name, infoButton, footer, author, enabled, setEnabled, description, onMouseEnter, onMouseLeave }: Props) {
+export function AddonCard({ disabled, isNew, name, infoButton, footer, author, badge, enabled, setEnabled, description, onMouseEnter, onMouseLeave }: Props) {
     const titleRef = useRef<HTMLDivElement>(null);
     const titleContainerRef = useRef<HTMLDivElement>(null);
 
@@ -72,6 +73,7 @@ export function AddonCard({ disabled, isNew, name, infoButton, footer, author, e
                             </div>
                         </div>
                         {isNew && <AddonBadge text="NEW" color="#ED4245" />}
+                        {badge}
                     </Text>
 
                     {!!author && (

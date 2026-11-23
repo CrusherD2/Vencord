@@ -31,9 +31,27 @@ export interface SourcePluginSelection {
     folder: string;
 }
 
+export interface SourcePluginUpdate extends SourcePluginSelection {
+    /** Folder name in src/userplugins, which can differ from the source's folder */
+    installedFolder: string;
+}
+
 const GITHUB_REPO_RE = /^(?:https?:\/\/)?(?:www\.)?github\.com\/([\w-]+)\/([\w.-]+?)(?:\.git)?(?:[/?#].*)?$/i;
 
 export const PLUGIN_FOLDER_RE = /^[\w-][\w.-]*$/;
+
+/**
+ * Compares dotted version numbers part by part, so 1.10.0 is newer than 1.9.2
+ * @returns Whether latest is newer than installed
+ */
+export function isNewerVersion(latest: string, installed: string) {
+    const a = latest.split("."), b = installed.split(".");
+    for (let i = 0; i < Math.max(a.length, b.length); i++) {
+        const diff = (a[i] ?? "0").localeCompare(b[i] ?? "0", "en", { numeric: true });
+        if (diff) return diff > 0;
+    }
+    return false;
+}
 
 /**
  * Parses a GitHub repository link like `https://github.com/owner/repo` (extra path segments are ignored)

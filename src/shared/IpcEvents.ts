@@ -44,6 +44,8 @@ export const enum IpcEvents {
     UPDATE_USER_PLUGIN = "VencordUpdateUserPlugin",
     GET_PLUGIN_SOURCE = "VencordGetPluginSource",
     INSTALL_FROM_PLUGIN_SOURCES = "VencordInstallFromPluginSources",
+    UPDATE_FROM_PLUGIN_SOURCES = "VencordUpdateFromPluginSources",
+    GET_USER_PLUGIN_VERSIONS = "VencordGetUserPluginVersions",
 
     OPEN_MONACO_EDITOR = "VencordOpenMonacoEditor",
     GET_MONACO_THEME = "VencordGetMonacoTheme",

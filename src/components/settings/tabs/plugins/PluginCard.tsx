@@ -9,6 +9,7 @@ import { hasAnyVisibleSettings, isPluginEnabled, pluginRequiresRestart, startDep
 import { Settings } from "@api/Settings";
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
+import { AddonBadge } from "@components/settings/PluginBadge";
 import { Plugin } from "@utils/types";
 import { React, showToast } from "@webpack/common";
 
@@ -20,9 +21,10 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
     disabled: boolean;
     onRestartNeeded(name: string, key: string): void;
     isNew?: boolean;
+    updateVersion?: string;
 }
 
-export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
+export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew, updateVersion }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
 
     const isEnabled = () => isPluginEnabled(plugin.name);
@@ -84,6 +86,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             name={plugin.name}
             description={plugin.description}
             isNew={isNew}
+            badge={updateVersion && <AddonBadge text={`UPDATE ${updateVersion}`} color="#5865F2" />}
             enabled={isEnabled()}
             setEnabled={toggleEnabled}
             disabled={disabled}
